@@ -14,7 +14,7 @@ export const elements = {
   weatherIcon: document.querySelector('#weather-icon'),
 }
 
-export function update(data) {
+export function displayWeather(data) {
 
   const mstoKmh = (data.wind.speed * 3.6).toFixed(1);
 
@@ -58,6 +58,10 @@ export function showError(msg) {
   elements.error.classList.remove('hidden');
   elements.weatherBox.classList.add('hidden');
   elements.loading.classList.add('hidden');
+}
+
+export function clearInput() {
+  elements.cityInput.value = '';
 }
 
 

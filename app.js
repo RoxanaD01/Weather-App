@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // Weather Config
-import { elements, showLoading, hideLoading, update, showError } from './modules/ui-controller.js';
+import { elements, showLoading, hideLoading, displayWeather, showError, clearInput } from './modules/ui-controller.js';
 import { getCurrentWeather } from './modules/weather-service.js';
 
 const setupEventListeners = () => {
@@ -47,8 +47,8 @@ const handleSearch = async () => {
 
   try {
     const data = await getCurrentWeather(city);
-    update(data);
-    console.log("Weather updated");
+    displayWeather(data);
+    clearInput()
   } catch (err) {
     showError(err.message || "Weather data could not be loaded.");
   } finally {

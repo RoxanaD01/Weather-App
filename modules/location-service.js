@@ -10,7 +10,8 @@ export const getCoords = () => new Promise((resolve, reject) => {
                 latitude: data.latitude,
                 longitude: data.longitude,
                 source: 'ip',
-                accuracy: 'city' 
+                accuracy: 'city',
+                timezone: data.timezone
             })
 
         } 
@@ -25,8 +26,7 @@ export const getCoords = () => new Promise((resolve, reject) => {
     }
 
     // Geolocation
-    navigator.geolocation.getCurrentPosition(
-    (position) => {
+    navigator.geolocation.getCurrentPosition(async(position) => {
       resolve({
         latitude: position.coords.latitude,
         longitude: position.coords.longitude,

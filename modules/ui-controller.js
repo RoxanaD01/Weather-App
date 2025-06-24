@@ -29,20 +29,25 @@ export function displayWeather(data) {
 
   const mstoKmh = (data.wind.speed * 3.6).toFixed(1);
 
-  const convertUnix = (unix, time) => {
-    const localTime = new Date((unix + time) * 1000);
-    return localTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  };
+  const convertUnix = (unix, ianaTimeZone) => {
+  const localTime = new Date(unix * 1000);
+  return localTime.toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+    timeZone: ianaTimeZone
+  });
+};
 
   // DOM update
     elements.cityName.textContent = data.name;
     updateTemperatureDisplay(elements, Math.round(data.main.temp), CONFIG.DEFAULT_UNITS);
     elements.humidity.textContent = data.main.humidity;
     elements.weather.textContent = data.weather[0].description.charAt(0).toUpperCase() + data.weather[0].description.slice(1);
-    elements.wind.textContent = mstoKmh;
+    elements.wind.textContent = `${mstoKmh} km/h`;
 
-    elements.sunrise.textContent = convertUnix(data.sys.sunrise, data.timezone);
-    elements.sunset.textContent = convertUnix(data.sys.sunset, data.timezone);
+    elements.sunrise.textContent = convertUnix(data.sys.sunrise, data.locationData);
+    elements.sunset.textContent = convertUnix(data.sys.sunset, data.locationData);
 
     const iconImg = data.weather[0].icon;
     elements.weatherIcon.src = `https://openweathermap.org/img/wn/${iconImg}@2x.png`;

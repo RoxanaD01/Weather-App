@@ -4,123 +4,168 @@
   box-sizing: border-box;
 }
 
+/* LIGHT */
+
 body {
-    font-family: Arial, Helvetica, sans-serif;
-    background: linear-gradient(to bottom, #4facfe, #00f2fe);
-    color: #fff;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    
-    align-items: center;
-    padding: 2rem;
+  font-family: 'Inter', Arial, sans-serif;
+  background: linear-gradient(to bottom, #4facfe, #00f2fe);
+  color: #222;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 2rem 1rem;
 }
 
-#theme-toggle {
-  margin-top: 1rem;
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 8px;
-  background-color: #ffffff;
-  color: #333;
-  cursor: pointer;
-  transition: all 0.3s ease;
+.container {
+  width: 100%;
+  max-width: 800px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
 }
 
-body.dark {
-  background: linear-gradient(to bottom, #1e1e1e, #121212);
-  color: #e0e0e0;
-}
-
-body.dark #theme-toggle {
-  background-color: #444;
-  color: #f0f0f0;
-}
+/* HEADER */
 
 header {
   width: 100%;
   display: flex;
   justify-content: center;
-  margin-bottom: 2rem;
 }
 
 .header-box {
   width: 100%;
-  max-width: 500px;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
 header h1 {
-    font-size: 2rem;
-    margin: 0;
-    flex: 1;
-    text-align: center;
+  font-size: 2.2rem;
+  color: #030972;
+  flex: 1;
+  text-align: center;
 }
 
 header h1 img{
     width: 10%;
 }
 
-.search-box {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-    justify-content: center;
-    flex-wrap: wrap;
+/* Toggle Button */
+
+#theme-toggle {
+  margin-left: 1rem;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: none;
+  background-color: transparent;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  color: #333;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-main {
+/* Controls */
+
+.controls {
+  width: 100px;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin: 25px 40px 25px 0px;
+  padding: 25px;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.controls select {
+  border: none;
+  background-color: transparent;
+  padding: 0.4rem;
+}
+
+.controls {
+  color: #121212;
+  background-color: transparent;
+}
+
+label {
+  font-size: 0.9rem;
+  color: #333;
+  margin-bottom: 0.25rem;
+  display: inline-block;
+}
+
+/* Search */
+
+.search-box {
   width: 100%;
-  max-width: 500px;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 #city-input {
-    padding: 0.75rem 1rem;
-    border: none;
-    border-radius: 8px;
-    font-size: 1rem;
-    width: 70%;
-    max-width: 300px;
+  padding: 0.7rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  flex: 1;
+  min-width: 60%;
+  max-width: 300px;
 }
 
 #search-btn{
-    padding: 0.75rem 1.2rem;
-    border: none;
-    border-radius: 8px;
-    background-color: #fff;
-    color: #0077cc;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+  padding: 0.7rem 1.2rem;
+  border: none;
+  border-radius: 8px;
+  background-color: #fff;
+  color: #0077cc;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
 #search-btn:hover {
-    background-color: #e0e0e0;
+  background-color: #e0e0e0;
 }
 
+/* Loading */
+
 #loading {
-    margin: 1rem 0;
-    font-weight: bold;
-    font-size: 1.1rem;
-    color: #ffffcc;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 0.5rem; 
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #ffffcc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 #loading::after {
   content: "";
-  width: 18px;
-  height: 18px;
+  width: 15px;
+  height: 15px;
   border: 3px solid #fff;
   border-top-color: transparent;
   border-radius: 50%;
   animation: spin 2s linear infinite;
 }
 
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Error */
 #error {
   margin: 1rem 0;
   padding: 0.5rem 1rem;
@@ -131,20 +176,25 @@ main {
 }
 
 #weather-display {
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(8px);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width:fit-content;
+  width: 100%;
+  height: fit-content;
   margin-top: 3rem;
-  outline: 4px solid rgba(219, 217, 217, 0.329);
   outline-offset: 10px;
   border-radius: 8px;
+  padding: 20px;
 }
 
 #weather-display h2 {
   margin-bottom: 1rem;
   text-align: center;
+  color: #e2e20e;
 }
 
 #weather-display img {
@@ -152,12 +202,118 @@ main {
   height: auto;;
 }
 
+#temperature {
+font-family:'Courier New', Courier, monospace;
+font-size: 52px ;
+color: #ffffffac;
+}
+
+#weather-info {
+color: #ffffffcb;
+font-size: 17px ;
+}
+
+#moreInfo {
+  margin-top: 15px;
+}
+
 .hidden {
   display: none;
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
+/* DARK */
+
+body.dark {
+  background: linear-gradient(to bottom, #1e1e1e, #121212);
+  color: #ffffff;
+}
+
+body.dark .container {
+  background-color: transparent;
+  color: #ffffff;
+}
+
+body.dark header h1 {
+  color: #f0f0f0;
+}
+
+body.dark #theme-toggle {
+  border: none;
+  background-color: #444444aa;
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(255, 255, 255, 0.1);
+}
+
+body.dark .controls select {
+  color: #ffffff;
+  background: transparent;
+}
+
+body.dark #city-input {
+  background-color: #333;
+  color: #fff;
+  border: 1px solid #555;
+}
+
+body.dark #search-btn {
+  background-color: #222;
+  color: #ffffff;
+}
+
+body.dark #search-btn:hover {
+  background-color: #444;
+}
+
+body.dark #loading {
+  color: #ffff99;
+}
+
+body.dark #loading::after {
+  border-color: #fff;
+  border-top-color: transparent;
+}
+
+body.dark #error {
+  background-color: rgba(255, 0, 0, 0.15);
+  color: #ffaaaa;
+  border: 1px solid #cc4444;
+}
+
+body.dark #weather-display {
+  background: rgba(255, 255, 255, 0.05);
+  color: #f0f0f0;
+  box-shadow: 0 4px 10px rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(6px);
+}
+
+body.dark #weather-display h2 {
+  color: #ffee00;
+}
+
+body.dark label {
+  color: #ccc;
+}
+
+/* Responsiveness */
+
+@media (max-width: 500px) {
+  .header-box {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  #weather-display {
+    width: 100%;
+    padding: 1rem;
+  }
+
+  #city-input {
+    width: 100%;
+    max-width: none;
+  }
+
+  .controls {
+    flex-direction: column;
+    align-items: center;
   }
 }

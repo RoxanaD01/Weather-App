@@ -4,12 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weather App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <script type="module" src="app.js"></script>
 </head>
 <body>
+    <div class="container">
     <header>
+        <div class="controls">
+            <div class="control-group">
+                <label for="unit-select"></label>
+                <select id="unit-select">
+                    <option value="metric" selected>Celsius (°C)</option>
+                    <option value="imperial">Fahrenheit (°F)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="lang-select"></label>
+                <select id="lang-select">
+                    <option value="ro">Română</option>
+                    <option value="en">Engleză</option>
+                    <option value="fr">Franceză</option>
+                    <option value="de">Germană</option>
+                    <option value="es">Spaniolă</option>
+                </select>
+            </div>
+        </div>
+
         <div class="header-box">
-            <h1> Weather </h1>
+            <h1> Weather App</h1>
             <button id="theme-toggle">☀️/🌙</button>
         </div>
     </header>
@@ -25,16 +49,17 @@
 
         <div id="weather-display" class="hidden">
             <h2 id="city-name"></h2>
+            <p><span id="temperature"></span></p>
+            <p><span id="weather-info"></span></p>
             <img id="weather-icon">
-            <p>Temperature: <span id="temperature"></span>°C</p>
-            <p>Humidity: <span id="humidity"></span>%</p>
-            <p>Weather: <span id="weather-info"></span></p>
-            <p>Sunrise: <span id="sunrise"></span></p>
-            <p>Sunset: <span id="sunset"></span></p>
-            <p>Wind Speed: <span id="wind-speed"></span> </p>
+            <div id="moreInfo">
+                <p>Humidity: <span id="humidity"></span>%</p>
+                <p>Sunrise: <span id="sunrise"></span></p>
+                <p>Sunset: <span id="sunset"></span></p>
+                <p>Wind Speed: <span id="wind-speed"></span> </p>
+            </div>
         </div>
     </main>
-    
-    <script type="module" src="app.js"></script>
+</div>
 </body>
 </html>

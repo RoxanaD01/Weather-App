@@ -5,7 +5,17 @@ export const CONFIG = {
   API_KEY: '10e361a8ce75897632ff7a4f717f025d', 
   API_BASE_URL: 'https://api.openweathermap.org/data/2.5',
   DEFAULT_UNITS: 'metric', 
-  DEFAULT_LANG: 'en'
+  DEFAULT_LANG: 'en', 
+  MAX_HISTORY_ITEMS: 10,
+  STORAGE_KEYS: {
+    SEARCH_HISTORY: 'weather_search_history',
+    USER_PREFERENCES: 'weather_user_prefs',
+  },
+  LOGGING: {
+    ENABLED: true,
+    LEVEL: 'info',    // other: 'debug', 'warn', 'error'
+    MAX_LOGS: 100,
+  },
 }
 
 // Endpoint organization

@@ -28,8 +28,8 @@ Follow these steps to get the Weather-App running on your local machine:
    
 🗺️ Roadmap
 
-- [x] Part 1: Fundamente
-- [ ] Part 2: API real
+- [x] Part 1: Basic structure
+- [ ] Part 2
 - [ ] Part 3
 - [ ] Part 4
 
@@ -55,9 +55,25 @@ Transform the app from a prototype into a fully functional application with live
 
 🗺️ Roadmap
 
-- [x] Part 1: Fundamente
-- [x] Part 2: API real
+- [x] Part 1: Basic structure
+- [x] Part 2: Real API integration
 - [ ] Part 3
+- [ ] Part 4
+
+🌤️ History & Logging Integration
+
+🎯 Objective
+Add search history and logging system.
+
+🚀 Implemented Features
+- Centralized config + logger + history service
+- UI: history section, events, clear button
+- Integration in `app.js`: logging and history persistence
+
+🗺️ Roadmap
+- [x] Part 1: Basic structure
+- [x] Part 2: Real API integration
+- [x] Part 3: History & logging integration
 - [ ] Part 4
 
 👨‍💻 Autor

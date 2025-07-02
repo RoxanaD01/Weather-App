@@ -16,7 +16,15 @@ export const elements = ({
   weatherIcon: document.querySelector('#weather-icon'),
 
   unitSelect: document.querySelector('#unit-select'),
-  langSelect: document.querySelector('#lang-select')
+  langSelect: document.querySelector('#lang-select'),
+
+  historySection: document.querySelector('#history-section'),
+  historyList: document.querySelector('#history-list'),
+  clearHistoryBtn: document.querySelector('#clear-history-btn'),
+  devTools: document.querySelector('#dev-tools'),
+  logDisplay: document.querySelector('#log-display'),
+  clearLogsBtn: document.querySelector('#clear-logs-btn'),
+  exportLogsBtn: document.querySelector('#export-logs-btn'),
 })
 
 export function displayWeather(data) {
@@ -99,4 +107,61 @@ export const loadUserPreferences = () => {
     unit: localStorage.getItem('appUnit') || 'metric',
     lang: localStorage.getItem('appLang') || 'en',
   }
+}
+
+// History
+export const showHistory = () => {
+  elements.historySection.classList.remove('hidden')
+}
+
+export const hideHistory = () => {
+  elements.historySection.classList.add('hidden')
+}
+
+export const renderHistory = (historyItems) => {
+  if (historyItems.length === 0) {
+    elements.historyList.innerHTML =
+      '<p class="no-history">There are no recent searches</p>'
+    return
+  }
+
+  const historyHTML = historyItems.map((item) => {
+      const timeAgo = getTimeAgo(item.timestamp)
+      return `
+      <div class="history-item" data-city="${item.city}" data-lat="${item.coords.lat.toFixed(2)}" data-lon="${item.coords.lon.toFixed(2)}">
+        <div class="history-location">
+          <span class="city">${item.city}</span>
+          <span class="country">${item.country}</span>
+        </div>
+        <div class="history-time">${timeAgo}</div>
+      </div>
+    `
+    })
+    .join('')
+
+  elements.historyList.innerHTML = historyHTML;
+}
+
+// Helper function for relative time
+const getTimeAgo = (timestamp) => {
+  const now = Date.now()
+  const diff = now - timestamp
+  const minutes = Math.floor(diff / 60000)
+  const hours = Math.floor(diff / 3600000)
+  const days = Math.floor(diff / 86400000)
+
+  if (minutes < 60) return `${minutes} minutes ago`
+  if (hours < 24) return `${hours} hours ago`
+  return `${days} days ago`
+}
+
+export const addHistoryEventListeners = (onHistoryClick, onClearHistory) => {
+  elements.historyList.addEventListener('click', (e) => {
+    onHistoryClick(e)
+  });
+
+  elements.clearHistoryBtn.addEventListener('click', () => {
+    onClearHistory();
+  });
+
 }

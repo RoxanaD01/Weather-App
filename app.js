@@ -14,24 +14,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Weather Config
 import {getCoords} from './modules/location-service.js';
-import { 
-  getCurrentWeather,
-  getWeatherByCoords, 
-  } from './modules/weather-service.js';
+import {getCurrentWeather, getWeatherByCoords} from './modules/weather-service.js';
 import {
-   elements, 
-   showLoading, 
-   hideLoading, 
-   displayWeather, 
-   showError, 
-   clearInput, 
-   loadUserPreferences, 
-   saveUserPreferences,
-   } from './modules/ui-controller.js';
-
+  elements, 
+  showLoading, 
+  hideLoading, 
+  displayWeather, 
+  showError, 
+  clearInput, 
+  loadUserPreferences, 
+  saveUserPreferences,
+  renderHistory,
+  showHistory,
+  addHistoryEventListeners,
+} from './modules/ui-controller.js';
+import { logger } from './modules/logger.js';
+import { historyService } from './modules/history-service.js';
 import { CONFIG } from './modules/config.js';
 
-const preferences = async () => {
+//App initialization
+const initializeApp = async () => {
+  logger.info('Weather App starting...')
   const { unit, lang } = loadUserPreferences();
   CONFIG.DEFAULT_UNITS = unit;
   CONFIG.DEFAULT_LANG = lang;
@@ -39,7 +42,62 @@ const preferences = async () => {
   elements.langSelect.value = lang;
 
   setupEventListeners();
+  loadHistoryOnStart();
+
+  logger.info('Weather App initialized successfully');
+
   await handleLocationSearch();
+};
+
+// Load search history at start
+const loadHistoryOnStart = () => {
+  const weatherHistory = historyService.getHistory();
+  if (weatherHistory.length > 0) {
+    renderHistory(weatherHistory);
+    showHistory();
+    logger.info(`Loaded ${weatherHistory.length} items from history`);
+  }
+};
+
+// Handle weather search by city name
+const handleSearch = async () => {
+  const city = elements.cityInput.value.trim();
+  logger.debug('Search initiated', { city });
+
+  if (!isValidCity(city)) {
+    const errorMsg = 'Please enter a valid city name.';
+    showError(errorMsg);
+    logger.warn('Invalid city input', { city });
+    return;
+  }
+
+  showLoading();
+
+  try {
+    logger.info('Fetching weather data', { city });
+    const data = await getCurrentWeather(city);
+
+    // Save to history
+    historyService.addLocation(data);
+
+    displayWeather(data);
+    clearInput();
+
+    // Reload history
+    const updatedHistory = historyService.getHistory();
+    renderHistory(updatedHistory);
+    showHistory();
+
+    logger.info('Weather data displayed successfully', {
+      city: data.name,
+      temp: data.main.temp,
+    });
+  } catch (err) {
+    showError(err.message || "Weather data could not be loaded.");
+    logger.error('Failed to fetch weather data', err);
+  } finally {
+    hideLoading();
+  }
 };
 
 // Load weather from current location or IP adress
@@ -67,23 +125,45 @@ const handleLocationSearch = async () => {
   }
 };
 
-// Load weather after city name
-const handleSearch = async () => {
-  const city = elements.cityInput.value.trim();
-  if (!isValidCity(city)) {
-    showError('Please enter a valid city name.');
-    return;
-  }
+// Load weather from clicked history item
+const handleHistoryClick = async (event) => {
+  const item = event.target.closest('.history-item');
+  if (!item) return;
 
-  showLoading();
+  const city = item.dataset.city;
+  const lat = parseFloat(item.dataset.lat);
+  const lon = parseFloat(item.dataset.lon);
+
+  logger.info('History item clicked', { city, lat, lon });
+
   try {
-    const data = await getCurrentWeather(city);
+    showLoading();
+
+    const data = await getWeatherByCoords(lat, lon);
+
+    // Move city to top of history
+    historyService.addLocation(data);
+
     displayWeather(data);
-    clearInput();
-  } catch (err) {
-    showError(err.message || "Weather data could not be loaded.");
+
+    const updatedHistory = historyService.getHistory();
+    renderHistory(updatedHistory);
+
+    logger.info('Weather loaded from history', { city });
+  } catch (error) {
+    showError('Could not load weather from history.');
+    logger.error('Failed to load weather from history', error);
   } finally {
     hideLoading();
+  }
+};
+
+// Clear search history
+const handleClearHistory = () => {
+  if (confirm('Are you sure you want to clear the entire search history?')) {
+    historyService.clearHistory();
+    renderHistory([]);
+    logger.info('Search history cleared');
   }
 };
 
@@ -135,10 +215,12 @@ const setupEventListeners = () => {
       await handleLocationSearch();
     }
   });
+
+   addHistoryEventListeners(handleHistoryClick, handleClearHistory);
 };
 
-document.addEventListener("DOMContentLoaded", preferences);
+document.addEventListener("DOMContentLoaded", initializeApp);
 
-
+console.log('History:', localStorage.getItem('weather_search_history'))
 
 

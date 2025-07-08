@@ -66,23 +66,7 @@ It’s designed as both a powerful learning experience and a production-level re
 - **Service Layer** – reusable logic for external APIs
 - **Observer Pattern** – event-based data updates
 - **Singleton Pattern** – shared service instances like Logger and HistoryService
-
-## 🏗️ Application Architecture
-
-weather-app/
-├── index.html              # Entry point
-├── styles.css              # Main styling
-├── app.js                  # App bootstrap & orchestration
-├── modules/
-│   ├── config.js           # Centralized configuration
-│   ├── weather-service.js  # API integration layer
-│   ├── location-service.js # GPS/IP location handling
-│   ├── history-service.js  # Search history & persistence
-│   ├── logger.js           # Logging system for dev/debug
-│   └── ui-controller.js    # UI DOM manipulation logic
-├── screenshots/
-└── README.md
-
+  
 ## 📸 Screenshots
 
 | ☀️ Light Theme | 🌙 Dark Theme | 

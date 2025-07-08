@@ -1,6 +1,20 @@
+import { logger } from "./logger.js";
+/**
+ * Gets the user's geographic coordinates using the browser's geolocation
+ * or, alternatively, the IP location service.
+ *
+ * @function
+ * @returns {Promise<Object>} A promise that resolves to an object with location.
+ * @returns {number} return.latitude - location latitude
+ * @returns {number} return.longitude - location longitude.
+ * @returns {string} return.source - Location source: "gps" or "ip".
+ * @returns {string} return.accuracy - Location accuracy: "precise" or "city".
+ */
+
 export const getCoords = () => new Promise((resolve, reject) => {
-    
-    //Fallback funcion - in case geolocation fails
+   /**
+   * Fallback for obtaining IP-based location if geolocation is unavailable or fails.
+   */
     const fallbackToIp = async () => {
         try {
             const response = await fetch('https://ipapi.co/json/');
@@ -15,16 +29,18 @@ export const getCoords = () => new Promise((resolve, reject) => {
 
         } 
         catch (err) {
-            reject(new Error('Could not determine location'));
+          logger.error('IP-based location failed', err);
+          reject(new Error('Could not determine location'));
         }
     }
 
-    // The browser does not support geolocation.
+    // Check if the browser supports geolocation.
     if(!navigator.geolocation) {
-        return fallbackToIp();
+      logger.warn('Geolocation not supported, falling back to IP location');
+      return fallbackToIp();
     }
 
-    // Geolocation
+    // Try to get the location via GPS
     navigator.geolocation.getCurrentPosition(
     (position) => {
       resolve({
@@ -35,14 +51,14 @@ export const getCoords = () => new Promise((resolve, reject) => {
       });
     },
     (error) => {
-      console.warn('Geolocation failed:', error.message);
+      logger.warn('Geolocation failed, falling back to IP location', error.message);
       fallbackToIp();
     },
   ),
     {
-    timeout: 6000,               // waiting time         
+    timeout: 6000,               // max waiting time         
     enableHighAccuracy: true,    
-    maximumAge: 0                // Not ro reuse a cached location
+    maximumAge: 0                // Not reuse a cached location
     }
 })
 

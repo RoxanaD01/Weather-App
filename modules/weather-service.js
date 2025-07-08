@@ -1,7 +1,14 @@
 import {MOCK_DATA, FALLBACK_MOCK_DATA, CONFIG, API_ENDPOINTS, ERROR_MESSAGES} from "./config.js";
+import { logger } from "./logger.js";
 
 
-// URL construction
+/**
+ * Builds a complete API URL with default and specific query parameters.
+ * 
+ * @param {string} endpoint - API endpoint path (e.g., 'weather').
+ * @param {Object} [params={}] - Additional query parameters (e.g., city, lat, lon).
+ * @returns {string} - Fully constructed API URL.
+ */
 export const buildUrl = (endpoint, params = {}) => {
   const url = new URL(`${CONFIG.API_BASE_URL}/${endpoint}`);
 
@@ -20,12 +27,18 @@ export const buildUrl = (endpoint, params = {}) => {
   return url.toString()
 }
 
-// API call - handle http error codes
+/**
+ * Makes an HTTP request to the specified URL and handles common HTTP errors.
+ */
 export const makeRequest = async (url) => {
   try {
-    const response = await fetch(url)
+    logger.info('Request started:', url);
+    const controller = new AbortController();
+    setTimeout(() => controller.abort(), 10000);
+    const response = await fetch(url, { signal: controller.signal });
 
     if (!response.ok) {
+      logger.warn(`Request failed with status ${response.status} for URL: ${url}`);
       switch(response.status) {
         case 404:
           throw new Error(ERROR_MESSAGES.CITY_NOT_FOUND || 'City not found. Try again.');
@@ -38,23 +51,29 @@ export const makeRequest = async (url) => {
       }
     }
 
-    return await response.json()
+    const data = await response.json();
+    logger.info('Request succeeded:', url);
+    return data;
 
   } catch (error) {
       if(error instanceof TypeError) {
+        logger.error('Network error:', error.message);
         throw new Error(ERROR_MESSAGES.NETWORK_ERROR || 'Network error. Please check your internet connection.' )
       }
+    logger.error('Request error:', error.message);
     throw new Error(error.message)
   }
 }
 
-// Fallback logic - If API fails it allows the app to continue 
+/**
+ * Attempts to fetch current weather data for a city. Falls back to mock data on failure.
+*/
 export const getCurrentWeatherWithFallback = async (city) => {
   try {
     return await getCurrentWeather(city) // Real API
   } catch (error) {
-    console.warn('Using fallback data due to:', error.message)
-    return {   // Fallback data
+    logger.warn('Using fallback data due to:', error.message)
+    return {   
       ...MOCK_DATA,
       isFallback: true,
       fallbackReason: error.message,
@@ -62,6 +81,14 @@ export const getCurrentWeatherWithFallback = async (city) => {
   }
 }
 
+/**
+ * Fetches current weather data for a given city using the API or mock data.
+ * @async
+ * @function getCurrentWeather
+ * @param {string} city - The name of the city to fetch weather for.
+ * @returns {Promise<Object>} Weather data for the specified city.
+ * @throws {Error} If the city is invalid or the API request fails.
+ */
 export const getCurrentWeather = async (city) => {
   try {
     if (FALLBACK_MOCK_DATA) {
@@ -70,7 +97,7 @@ export const getCurrentWeather = async (city) => {
       if (!city || city.trim() === "") {
         throw new Error("Invalid city name");
       }
-
+      logger.info('Using mock data for city:', city);
       return {
         ...MOCK_DATA,
         name: city.trim(),
@@ -85,11 +112,14 @@ export const getCurrentWeather = async (city) => {
     const url = buildUrl(API_ENDPOINTS.CURRENT_WEATHER, { q: city });
     return await makeRequest(url);
   } catch (error) {
-    console.error("getCurrentWeather error:", error.message);
+    logger.error("getCurrentWeather error:", error.message);
     throw error; 
   }
 };
 
+/**
+ * Fetches current weather data by geographic coordinates.
+ */
 export const getWeatherByCoords = async (lat, lon) => {
   try {
     if (FALLBACK_MOCK_DATA) {
@@ -115,10 +145,60 @@ export const getWeatherByCoords = async (lat, lon) => {
     const url = buildUrl(API_ENDPOINTS.CURRENT_WEATHER, { lat, lon });
     return await makeRequest(url);
   } catch (error) {
-    console.error("getWeatherByCoords error:", error.message);
+    logger.error("getWeatherByCoords error:", error.message);
     throw error;
   }
 };
 
+/**
+ * Class for caching weather data with automatic expiration.
+*/
+class WeatherCache {
+  /**
+   * Creates a WeatherCache instance. Maximum age for cached data in milliseconds (default 10 minutes).
+   */
+  constructor(maxAge = 10 * 60 * 1000) {
+    this.cache = new Map();
+    this.maxAge = maxAge;
+  }
+
+  /**
+   * Retrieves cached data if not expired.
+   * 
+   * @param {string} key - Unique key for cached data.
+   * @returns {Object|null} - Cached data or null if not found or expired.
+   */
+  get(key) {
+    const entry = this.cache.get(key);
+
+    if (!entry) return null;
+
+    const expiredData = Date.now() - entry.timestamp > this.maxAge;
+    if (expiredData) {
+      this.cache.delete(key);
+      return null;
+    }
+
+    return entry.data;
+  }
+
+  set(key, data) {
+    this.cache.set(key, {
+      data,
+      timestamp: Date.now(),
+    });
+  }
+
+  cleanup() {
+    const currentTime = Date.now();
+    for (const [key, entry] of this.cache.entries()) {
+      if (currentTime - entry.timestamp > this.maxAge) {
+        this.cache.delete(key);
+      }
+    }
+  }
+}
+
+export const weatherCache = new WeatherCache()
 
 

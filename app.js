@@ -1,5 +1,11 @@
-//Light/Dark Toggle
+/**
+ * @file app.js
+ * @description Main entry point of the Weather App. Handles UI initialization, weather data fetching,
+ * search history management, theme toggling, and user preferences.
+ * @module app
+ */
 
+//Light/Dark Toggle
 document.addEventListener("DOMContentLoaded", () => {
   const toggleBtn = document.querySelector("#theme-toggle");
 
@@ -12,9 +18,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 
-// Weather Config
 import {getCoords} from './modules/location-service.js';
-import {getCurrentWeather, getWeatherByCoords} from './modules/weather-service.js';
+import {getCurrentWeather, getWeatherByCoords, weatherCache} from './modules/weather-service.js';
 import {
   elements, 
   showLoading, 
@@ -27,12 +32,18 @@ import {
   renderHistory,
   showHistory,
   addHistoryEventListeners,
+  debouncedSearch,
 } from './modules/ui-controller.js';
 import { logger } from './modules/logger.js';
 import { historyService } from './modules/history-service.js';
 import { CONFIG } from './modules/config.js';
 
-//App initialization
+/**
+ * Initializes the application by loading preferences, rendering history, setting up event listeners,
+ * and fetching weather based on current location.
+ * @async
+ * @returns {Promise<void>}
+ */
 const initializeApp = async () => {
   logger.info('Weather App starting...')
   const { unit, lang } = loadUserPreferences();
@@ -47,9 +58,18 @@ const initializeApp = async () => {
   logger.info('Weather App initialized successfully');
 
   await handleLocationSearch();
+
+  setInterval(() => {
+  weatherCache.cleanup();
+   logger.debug('Cache cleanup executed');
+  }, 5 * 60 * 1000);  // clear cache every 5 min
+
+
 };
 
-// Load search history at start
+/**
+ * Loads and renders the search history if available.
+ */
 const loadHistoryOnStart = () => {
   const weatherHistory = historyService.getHistory();
   if (weatherHistory.length > 0) {
@@ -59,7 +79,11 @@ const loadHistoryOnStart = () => {
   }
 };
 
-// Handle weather search by city name
+/**
+ * Handles weather search by city name. Validates input, fetches weather data, updates history, and displays result.
+ * @async
+ * @returns {Promise<void>}
+ */
 const handleSearch = async () => {
   const city = elements.cityInput.value.trim();
   logger.debug('Search initiated', { city });
@@ -73,9 +97,17 @@ const handleSearch = async () => {
 
   showLoading();
 
+  const cachedData = weatherCache.get(city);
+  if(cachedData) {
+    logger.info('Loaded from cache', {city});
+    displayWeather(cachedData);
+    clearInput();
+    return;
+  }
   try {
     logger.info('Fetching weather data', { city });
     const data = await getCurrentWeather(city);
+    weatherCache.set(city, data);
 
     // Save to history
     historyService.addLocation(data);
@@ -100,7 +132,11 @@ const handleSearch = async () => {
   }
 };
 
-// Load weather from current location or IP adress
+/**
+ * Fetches user's location (via GPS or IP) and loads weather data for those coordinates.
+ * @async
+ * @returns {Promise<void>}
+ */
 const handleLocationSearch = async () => {
   try {
     showLoading(elements, 'Detecting location...');
@@ -111,7 +147,7 @@ const handleLocationSearch = async () => {
     }
 
     if (coords.source === 'ip') {
-      console.warn('Approximate location via IP');
+      logger.warn('Approximate location via IP');
     }
 
     showLoading(elements, 'Loading weather...')
@@ -125,7 +161,12 @@ const handleLocationSearch = async () => {
   }
 };
 
-// Load weather from clicked history item
+/**
+ * Handles clicks on history items, fetches weather by coordinates, and updates display.
+ * @async
+ * @param {MouseEvent} event - Click event on history item
+ * @returns {Promise<void>}
+ */
 const handleHistoryClick = async (event) => {
   const item = event.target.closest('.history-item');
   if (!item) return;
@@ -172,20 +213,22 @@ const isValidCity = (city) => {
   return city.length >= 2 && /^[a-zA-ZăâîșțĂÂÎȘȚ\s-]+$/.test(city);
 };
 
-// Event Handling
+/**
+ * Sets up all UI event listeners: search, unit/language change, history click, and clear history.
+ */
 const setupEventListeners = () => {
-
-  // Search city
   elements.searchBtn.addEventListener('click', (e) => {
     e.preventDefault();
     handleSearch();
   });
 
-  elements.cityInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleSearch();
-    }
+  elements.cityInput.addEventListener('keyup', (e) => {
+  const city = e.target.value.trim();
+    debouncedSearch(() => {
+      if (city.length > 3 && isValidCity(city)) {
+        handleSearch(); 
+      }
+    });
   });
 
   // Unit change (Celsius/Fahrenheit)
@@ -203,7 +246,6 @@ const setupEventListeners = () => {
     }
   });
 
-  // Language change
   elements.langSelect.addEventListener('change', async (e) => {
     const newLang = e.target.value;
     CONFIG.DEFAULT_LANG = newLang;
@@ -216,11 +258,14 @@ const setupEventListeners = () => {
     }
   });
 
+
    addHistoryEventListeners(handleHistoryClick, handleClearHistory);
 };
 
 document.addEventListener("DOMContentLoaded", initializeApp);
 
-console.log('History:', localStorage.getItem('weather_search_history'))
-
+window.addEventListener("DOMContentLoaded", () => {
+  logger.info("DOM loaded");
+  logger.show();
+});
 

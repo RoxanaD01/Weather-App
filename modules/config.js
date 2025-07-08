@@ -1,24 +1,32 @@
+import { ENV_CONFIG } from "./environment.js"
 
-
-// Common info for all API requests
+/**
+* Main configuration for the weather app
+* @type {Object}
+*/
 export const CONFIG = {
-  API_KEY: '10e361a8ce75897632ff7a4f717f025d', 
+  API_KEY: ENV_CONFIG.API_KEY, 
   API_BASE_URL: 'https://api.openweathermap.org/data/2.5',
   DEFAULT_UNITS: 'metric', 
   DEFAULT_LANG: 'en', 
   MAX_HISTORY_ITEMS: 10,
+
   STORAGE_KEYS: {
     SEARCH_HISTORY: 'weather_search_history',
     USER_PREFERENCES: 'weather_user_prefs',
   },
+
   LOGGING: {
-    ENABLED: true,
-    LEVEL: 'info',    // other: 'debug', 'warn', 'error'
+    ENABLED: ENV_CONFIG.ENABLE_LOGGING,
+    LEVEL: ENV_CONFIG.DEBUG ? 'debug' : 'info',    
     MAX_LOGS: 100,
   },
+  
+  DEBUG_MODE: ENV_CONFIG.DEBUG,
+  CACHE_TTL: ENV_CONFIG.CACHE_TTL,
 }
 
-// Endpoint organization
+/** Endpoint organization*/
 export const API_ENDPOINTS = {
   CURRENT_WEATHER: 'weather',
   FORECAST: 'forecast',
@@ -27,7 +35,6 @@ export const API_ENDPOINTS = {
   REVERSE_GEO: 'geo/1.0/reverse',    // city coordonates
 }
 
-// Messages
 export const ERROR_MESSAGES = {
   CITY_NOT_FOUND: 'City not found. Try again.',
   NETWORK_ERROR: 'Network error. Please check your internet connection.',

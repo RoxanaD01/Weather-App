@@ -1,6 +1,11 @@
 import {CONFIG } from "./config.js";
+import { logger } from "./logger.js";
 
-export const elements = ({
+/**
+ * Object containing references to all important DOM elements.
+ * @type {Object<string, HTMLElement>}
+ */
+export const elements = {
   cityInput: document.querySelector('#city-input'),
   searchBtn: document.querySelector('#search-btn'),
   cityName: document.querySelector('#city-name'),
@@ -15,27 +20,38 @@ export const elements = ({
   weatherBox: document.querySelector('#weather-display'),
   weatherIcon: document.querySelector('#weather-icon'),
 
+  // Preferences
   unitSelect: document.querySelector('#unit-select'),
   langSelect: document.querySelector('#lang-select'),
 
+  // History
   historySection: document.querySelector('#history-section'),
   historyList: document.querySelector('#history-list'),
   clearHistoryBtn: document.querySelector('#clear-history-btn'),
+
+  // Logger
   devTools: document.querySelector('#dev-tools'),
   logDisplay: document.querySelector('#log-display'),
   clearLogsBtn: document.querySelector('#clear-logs-btn'),
   exportLogsBtn: document.querySelector('#export-logs-btn'),
-})
+}
 
 export function displayWeather(data) {
   
   if (!data || !data.main || typeof data.main.temp === 'undefined') {
     showError('The weather data is incomplete or invalid.');
-    console.error('Received weather data:', data);
+    logger.error('Invalid weather data received in displayWeather', data);
     return;
   }
 
   const mstoKmh = (data.wind.speed * 3.6).toFixed(1);
+
+  /**
+   * Converts a UNIX timestamp to a local time string.
+   * @param {number} unix - The UNIX timestamp.
+   * @param {string} ianaTimeZone - IANA time zone string.
+   * @returns {string} Formatted local time.
+   */
 
   const convertUnix = (unix, ianaTimeZone) => {
   const localTime = new Date(unix * 1000);
@@ -65,8 +81,6 @@ export function displayWeather(data) {
     elements.error.classList.add('hidden');
 }
 
-// Loading and Error
-
 export function showLoading() {
   elements.loading.classList.remove('hidden');
   elements.weatherBox.classList.add('hidden');
@@ -89,19 +103,23 @@ export function clearInput() {
   elements.cityInput.value = '';
 }
 
-// Update temp symbol 
+/**
+ * Updates the temperature display with the correct unit.
+ * @param {Object} elements - The DOM elements object.
+ * @param {number} temperature - The temperature value.
+ * @param {string} unit - Unit of temperature ('metric' or 'imperial').
+ */
 export const updateTemperatureDisplay = (elements, temperature, unit) => {
   const symbol = unit === 'imperial' ? '°F' : '°C';
   elements.temperature.textContent = `${temperature}${symbol}`
 }
 
-// Save user preferences
+
 export const saveUserPreferences = (unit, lang) => {
   localStorage.setItem('appUnit', unit);
   localStorage.setItem('appLang', lang);
 }
 
-// Load user preferences
 export const loadUserPreferences = () => {
   return {
     unit: localStorage.getItem('appUnit') || 'metric',
@@ -118,6 +136,10 @@ export const hideHistory = () => {
   elements.historySection.classList.add('hidden')
 }
 
+/**
+ * Renders the search history items in the UI.
+ * @param {Array<Object>} historyItems - Array of history objects.
+ */
 export const renderHistory = (historyItems) => {
   if (historyItems.length === 0) {
     elements.historyList.innerHTML =
@@ -142,7 +164,11 @@ export const renderHistory = (historyItems) => {
   elements.historyList.innerHTML = historyHTML;
 }
 
-// Helper function for relative time
+/**
+ * Converts a timestamp into a human-readable relative time.
+ * @param {number} timestamp - The timestamp to convert.
+ * @returns {string} Time ago string.
+ */
 const getTimeAgo = (timestamp) => {
   const now = Date.now()
   const diff = now - timestamp
@@ -165,3 +191,18 @@ export const addHistoryEventListeners = (onHistoryClick, onClearHistory) => {
   });
 
 }
+
+/**
+ * Creates a debounced search function to limit API calls.
+ * @param {number} [delay=300] - Delay in milliseconds.
+ * @returns {(searchFn: Function) => void}
+ */
+const createDebouncedSearch = (delay = 300) => {
+  let timeout
+  return (searchFn) => {
+    clearTimeout(timeout)
+    timeout = setTimeout(searchFn, delay)
+  }
+}
+
+export const debouncedSearch = createDebouncedSearch()

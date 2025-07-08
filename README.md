@@ -70,7 +70,7 @@ It’s designed as both a powerful learning experience and a production-level re
 ## 📸 Screenshots
 
 | ☀️ Light Theme | 🌙 Dark Theme | 
-| ![Light Theme](./screenshots/light-mode.PNG) | ![Dark Theme](./screenshots/dark-mode.PNG) | 
+| | <img src="./screenshots/light-mode.PNG" width="200" /> | <img src="./screenshots/dark-mode.PNG" width="200" /> | | 
 
 ## 🔍 How It Works
 

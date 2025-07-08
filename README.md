@@ -67,9 +67,8 @@ It’s designed as both a powerful learning experience and a production-level re
 - **Observer Pattern** – event-based data updates
 - **Singleton Pattern** – shared service instances like Logger and HistoryService
   
-## 📸 Screenshots
+## 📸 Screenshots - | ☀️ Light Theme | 🌙 Dark Theme | 
 
-| ☀️ Light Theme | 🌙 Dark Theme | 
 | | <img src="./screenshots/light-mode.PNG" width="400" /> | <img src="./screenshots/dark-mode.PNG" width="400" /> | | 
 
 ## 🔍 How It Works
